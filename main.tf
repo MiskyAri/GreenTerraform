@@ -4,11 +4,35 @@ terraform {
             source ="hashicorp/aws"
             version= "~>3.5.0"
         }
+
+        docker = {
+            source  = "kreuzwerker/docker"
+            version = "~> 2.13.0"
+       }
     }
 }
 
 provider "aws" {
     region = "eu-west-1"
+}
+
+provider "docker" {
+  version = "~> 2.7"
+  host    = "npipe:////.//pipe//docker_engine"
+}
+
+resource "docker_image" "nginx" {
+  name         = "nginx:latest"
+  keep_locally = false
+}
+
+resource "docker_container" "nginx" {
+  image = docker_image.nginx.latest
+  name  = "GreenCoinFront"
+  ports {
+    internal = 80
+    external = 8000
+  }
 }
 
 resource "aws_budgets_budget" "like-and-subscribe" {
@@ -57,3 +81,4 @@ resource "aws_instance" "web" {
     Name = "GreenCoin"
   }
 }
+
